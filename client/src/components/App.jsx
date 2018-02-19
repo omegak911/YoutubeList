@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import Login from './Login';
 import PlayList from './PlayList';
 import Search from './Search';
 import VideoPlayer from './VideoPlayer';
@@ -22,14 +23,34 @@ class App extends React.Component {
     }
 
     this.addToInventory = this.addToInventory.bind(this);
+    this.login = this.login.bind(this);
     this.searchYouTube = this.searchYouTube.bind(this);
   }
 
   addToInventory(video) {
     this.setState({inventory: [...this.state.inventory, video]});
-    axios.post('/savePlaylist', this.state.inventory)
+    axios.put('/savePlaylist', this.state.inventory)
       .then( result => {
         console.log(result)
+      })
+      .catch( err => {
+        console.log(err);
+      })
+  }
+
+  login(name, password) {
+    let params = {
+      params: {
+        name: name,
+        password: password
+      }
+    }
+
+    axios.get('/login', params)
+      .then( ({data}) => {
+        if (Array.isArray(data)) {
+          this.setState({currentVid: data[0], inventory: data, videos: data});
+        }
       })
       .catch( err => {
         console.log(err);
@@ -59,13 +80,16 @@ class App extends React.Component {
     return(
       <div>
         <div>
+          <Login login={this.login} />
+        </div>
+        <div>
           <Search searchYouTube={this.searchYouTube} />
         </div>
         <div>
-          <VideoPlayer currentVid={currentVid}/>
+          <VideoPlayer addToInventory={this.addToInventory} currentVid={currentVid}/>
         </div>
         <div>
-          <PlayList videos={videos}/>
+          <PlayList addToInventory={this.addToInventory} videos={videos}/>
         </div>
       </div>
     )

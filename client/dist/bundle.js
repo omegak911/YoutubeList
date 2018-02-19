@@ -18283,6 +18283,10 @@ var _axios = __webpack_require__(35);
 
 var _axios2 = _interopRequireDefault(_axios);
 
+var _Login = __webpack_require__(58);
+
+var _Login2 = _interopRequireDefault(_Login);
+
 var _PlayList = __webpack_require__(54);
 
 var _PlayList2 = _interopRequireDefault(_PlayList);
@@ -18328,6 +18332,7 @@ var App = function (_React$Component) {
     };
 
     _this.addToInventory = _this.addToInventory.bind(_this);
+    _this.login = _this.login.bind(_this);
     _this.searchYouTube = _this.searchYouTube.bind(_this);
     return _this;
   }
@@ -18336,8 +18341,30 @@ var App = function (_React$Component) {
     key: 'addToInventory',
     value: function addToInventory(video) {
       this.setState({ inventory: [].concat(_toConsumableArray(this.state.inventory), [video]) });
-      _axios2.default.post('/savePlaylist', this.state.inventory).then(function (result) {
+      _axios2.default.put('/savePlaylist', this.state.inventory).then(function (result) {
         console.log(result);
+      }).catch(function (err) {
+        console.log(err);
+      });
+    }
+  }, {
+    key: 'login',
+    value: function login(name, password) {
+      var _this2 = this;
+
+      var params = {
+        params: {
+          name: name,
+          password: password
+        }
+      };
+
+      _axios2.default.get('/login', params).then(function (_ref) {
+        var data = _ref.data;
+
+        if (Array.isArray(data)) {
+          _this2.setState({ currentVid: data[0], inventory: data, videos: data });
+        }
       }).catch(function (err) {
         console.log(err);
       });
@@ -18352,8 +18379,8 @@ var App = function (_React$Component) {
           query: query
         }
       };
-      _axios2.default.get('/searchYouTube', params).then(function (_ref) {
-        var data = _ref.data;
+      _axios2.default.get('/searchYouTube', params).then(function (_ref2) {
+        var data = _ref2.data;
 
         context.setState({ videos: data.items, currentVid: data.items[0] });
       }).catch(function (err) {
@@ -18374,17 +18401,22 @@ var App = function (_React$Component) {
         _react2.default.createElement(
           'div',
           null,
+          _react2.default.createElement(_Login2.default, { login: this.login })
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
           _react2.default.createElement(_Search2.default, { searchYouTube: this.searchYouTube })
         ),
         _react2.default.createElement(
           'div',
           null,
-          _react2.default.createElement(_VideoPlayer2.default, { currentVid: currentVid })
+          _react2.default.createElement(_VideoPlayer2.default, { addToInventory: this.addToInventory, currentVid: currentVid })
         ),
         _react2.default.createElement(
           'div',
           null,
-          _react2.default.createElement(_PlayList2.default, { videos: videos })
+          _react2.default.createElement(_PlayList2.default, { addToInventory: this.addToInventory, videos: videos })
         )
       );
     }
@@ -19986,7 +20018,8 @@ var _PlayListItem2 = _interopRequireDefault(_PlayListItem);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var PlayList = function PlayList(_ref) {
-  var videos = _ref.videos;
+  var addToInventory = _ref.addToInventory,
+      videos = _ref.videos;
 
 
   return _react2.default.createElement(
@@ -19995,7 +20028,7 @@ var PlayList = function PlayList(_ref) {
     'Hello from PlayList',
     videos.map(function (video, index) {
       console.log(video);
-      return _react2.default.createElement(_PlayListItem2.default, { key: index, index: index, video: video });
+      return _react2.default.createElement(_PlayListItem2.default, { addToInventory: addToInventory, key: index, index: index, video: video });
     })
   );
 };
@@ -20020,7 +20053,8 @@ var _react2 = _interopRequireDefault(_react);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var PlayListItem = function PlayListItem(_ref) {
-  var index = _ref.index,
+  var addToInventory = _ref.addToInventory,
+      index = _ref.index,
       video = _ref.video;
 
 
@@ -20030,7 +20064,9 @@ var PlayListItem = function PlayListItem(_ref) {
     "Hello from PlayListItem",
     _react2.default.createElement(
       "button",
-      { type: "button" },
+      { onClick: function onClick() {
+          return addToInventory(video);
+        }, type: "button" },
       "+"
     ),
     _react2.default.createElement("br", null),
@@ -20119,7 +20155,8 @@ var _react2 = _interopRequireDefault(_react);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var VideoPlayer = function VideoPlayer(_ref) {
-  var currentVid = _ref.currentVid;
+  var addToInventory = _ref.addToInventory,
+      currentVid = _ref.currentVid;
   return _react2.default.createElement(
     "div",
     { className: "container" },
@@ -20134,11 +20171,66 @@ var VideoPlayer = function VideoPlayer(_ref) {
       "p",
       null,
       "currentVid.snippet.description"
+    ),
+    _react2.default.createElement(
+      "button",
+      { type: "button", onClick: addToInventory },
+      "+"
     )
   );
 };
 
 exports.default = VideoPlayer;
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Login = function Login(_ref) {
+  var login = _ref.login;
+
+
+  var loginInHandler = function loginInHandler() {
+    var name = document.getElementById('name');
+    var password = document.getElementById('password');
+
+    login(name.value, password.value);
+
+    name.value = '';
+    password.value = '';
+  };
+
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(
+      'form',
+      { action: '' },
+      _react2.default.createElement('input', { id: 'name', type: 'text' }),
+      _react2.default.createElement('input', { id: 'password', type: 'text' }),
+      _react2.default.createElement(
+        'button',
+        { type: 'button', onClick: loginInHandler },
+        'Log In'
+      )
+    )
+  );
+};
+
+exports.default = Login;
 
 /***/ })
 /******/ ]);

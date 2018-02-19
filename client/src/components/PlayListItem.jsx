@@ -1,11 +1,11 @@
 import React from 'react';
 
-const PlayListItem = ({index, video}) => {
+const PlayListItem = ({addToInventory, index, video}) => {
 
   return (
     <div className="container">
       Hello from PlayListItem
-      <button type="button">+</button>
+      <button onClick={() => addToInventory(video)} type="button">+</button>
       <br/>
       <img src={video.snippet.thumbnails.default.url} alt=""/>
       <br/>

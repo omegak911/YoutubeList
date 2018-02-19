@@ -2,9 +2,14 @@ const dbHelpers = require('../db/dbHelpers');
 const apiHelpers = require('../api/apiHelpers');
 
 module.exports = {
-  get: {
+  get: { 
     searchYouTube: function(req, res) {
     //uses youtube API
+      // console.log(req.query);
+      apiHelpers.searchYouTube(req.query, (results) => {
+        res.status(200).send(results.body)
+      })
+     
     }
   },
   post: {
